@@ -1,1 +1,1 @@
-# glua-snippets
+# GLua Snippets
