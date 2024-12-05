@@ -1,14 +1,13 @@
+local strsub, strbyte, strmatch = string.sub, string.byte, string.match
+local arguments = setmetatable({}, { __mode = "v" })
+
 -- UTF-8 support
-local strsub = string.sub
-local arguments, arglen = setmetatable({}, { __mode = "v" }), 0
-local curString, match = "", ""
-
 function string.ExtractArgs(text, max)
-	arglen, curString = 0, ""
-
+	local arglen, curString = 0, ""
 	local pos, charbytes = 1
+
 	while pos <= #text do
-		local b = string.byte(text, pos)
+		local b = strbyte(text, pos)
 		if b < 0x80 then charbytes = 1
 		elseif b < 0xE0 then charbytes = 2
 		elseif b < 0xF0 then charbytes = 3
@@ -17,7 +16,7 @@ function string.ExtractArgs(text, max)
 		local c = strsub(text, pos, pos + charbytes - 1)
 
 		if c == '"' then
-			match = string.match(strsub(text, pos), '%b""')
+			local match = strmatch(strsub(text, pos), '%b""')
 
 			if match then
 				curString = ""
@@ -32,9 +31,8 @@ function string.ExtractArgs(text, max)
 		elseif curString == "" and c == " " then
 		else curString = curString..c end
 
-		if max and max > arglen then
-			curString = ""
-			break
+		if max and arglen >= max then
+			return arguments, arglen
 		end
 
 		pos = pos + charbytes
